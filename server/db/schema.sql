@@ -1,6 +1,12 @@
--- schema file for the database structure
+-- schema.sql
+-- defines structure of database items.
 
--- delete data on reset
+-- =============================================================
+-- === TABLES ===
+
+-- TIMELINE
+
+-- TODO
 DROP TABLE IF EXISTS todos;
 
 CREATE TABLE todos (
@@ -10,6 +16,19 @@ CREATE TABLE todos (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- test sample
+-- CALENDAR
+
+-- COURSES
+
+-- =============================================================
+-- === TESTS ===
+
+-- TIMELINE
+
+-- TODOS
 INSERT INTO todos (title, checked_off)
 VALUES ('sample todo', false);
+
+-- CALENDAR
+
+-- COURSES

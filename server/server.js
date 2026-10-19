@@ -1,18 +1,34 @@
-require('dotenv').config(); // .env requirement
+// server.js 
+// handles configuration, booting the server, and handling incoming
+// http requests and data.
 
-const pool = require('./db');
+// =============================================================
+// === CONFIG ===
 
-// import and install express
+require('dotenv').config();
+
+const pool = require('./db/db');
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3000; // user PORT, defualts to 3000
+const PORT = process.env.PORT || 3000;
 
-// test route - hello world
-app.get('/', (req, res) => {
-    res.send('OOGLY BOOGLY BOOGLY BOO MY SERVER IS UP AND SO ARE YOU');
+app.use(express.json());
+app.use('/todos', require('./routes/todos'));
+
+// =============================================================
+// === ROUTES ===
+
+// BEGIN SERVER
+app.listen(PORT, () => {
+    console.log(`server is running at http://localhost:${PORT}/`)
 });
 
-// test route - postgreSQL (visit ./db-test to see)
+// HOME PAGE
+app.get('/', (req, res) => {
+    res.send('home page');
+});
+
+// POSTGRESQL TEST (visit ./db-test to see)
 app.get('/db-test', async (req, res) => {
     try {
         const result = await pool.query('SELECT NOW()');
@@ -21,9 +37,4 @@ app.get('/db-test', async (req, res) => {
         console.error(err);
         res.status(500).send('Database error');
     }
-});
-
-// begin server
-app.listen(PORT, () => {
-    console.log(`server is running at http://localhost:${PORT}/`)
 });

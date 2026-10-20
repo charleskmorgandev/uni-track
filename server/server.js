@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use('/todos', require('./routes/todos'));
+app.use('/boards', require('./routes/boards'));
 
 // =============================================================
 // === ROUTES ===

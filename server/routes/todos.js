@@ -17,8 +17,8 @@ router.get('/', async (req, res) => {
 
         // if given board_id, give todos from that board
         const result = board_id
-            ? await pool.query('SELECT * FROM todos WHERE board_id = $1 ORDER BY created_at', [board_id])
-            : await pool.query('SELECT * FROM todos ORDER BY created_at');
+            ? await pool.query('SELECT * FROM todos WHERE board_id = $1 ORDER BY position, created_at', [board_id])
+            : await pool.query('SELECT * FROM todos ORDER BY position, created_at');
         res.json(result.rows);
     } 
     catch (err) {
@@ -31,7 +31,10 @@ router.post('/', async (req, res) => {
     try {
         const { board_id, subject, title } = req.body;
         const result = await pool.query(
-            'INSERT INTO todos (board_id, subject, title) VALUES ($1, $2, $3) RETURNING *',
+            `INSERT INTO todos (board_id, subject, title, position) 
+            VALUES ($1, $2, $3, 
+                (SELECT COALESCE(MAX(position), 0) + 1 FROM todos WHERE board_id = $1)) 
+            RETURNING *`,
             [board_id, subject, title]);
         res.status(201).json(result.rows[0]);
     } 
@@ -43,16 +46,17 @@ router.post('/', async (req, res) => {
 // PUT
 router.put('/:id', async (req, res) => {
     try {
-        const { board_id, subject, title, checked_off } = req.body;
+        const { board_id, subject, title, checked_off, position } = req.body;
         const result = await pool.query(
             `UPDATE todos
             SET board_id = COALESCE($1, board_id),
                 subject = COALESCE($2, subject),
                 title = COALESCE($3, title),
-                checked_off = COALESCE($4, checked_off)
-            WHERE id = $5
+                checked_off = COALESCE($4, checked_off),
+                position = COALESCE($5, position)
+            WHERE id = $6
             RETURNING *`,
-            [board_id, subject, title, checked_off, req.params.id]);
+            [board_id, subject, title, checked_off, position, req.params.id]);
         if (result.rows.length === 0) return res.status(404).json({ error: 'Todo not found' });
         res.json(result.rows[0]);
     } 

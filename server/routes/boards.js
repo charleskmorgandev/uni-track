@@ -13,7 +13,7 @@ const router = express.Router();
 // GET
 router.get('/', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM boards ORDER BY created_at');
+        const result = await pool.query('SELECT * FROM boards ORDER BY position, created_at');
         res.json(result.rows);
     } 
     catch (err) {
@@ -26,7 +26,9 @@ router.post('/', async (req, res) => {
     try {
         const { title } = req.body;
         const result = await pool.query(
-            'INSERT INTO boards (title) VALUES ($1) RETURNING *', [title]);
+            `INSERT INTO boards (title, position) 
+            VALUES ($1, (SELECT COALESCE(MAX(position), 0) + 1 FROM boards)) 
+            RETURNING *`, [title]);
         res.status(201).json(result.rows[0]);
     } 
     catch (err) {
@@ -37,10 +39,13 @@ router.post('/', async (req, res) => {
 // PUT
 router.put('/:id', async (req, res) => {
     try {
-        const { title } = req.body;
+        const { title, position } = req.body;
         const result = await pool.query(
-            `UPDATE boards SET title = COALESCE($1, title) WHERE id = $2
-            RETURNING *`, [title, req.params.id]);
+            `UPDATE boards 
+            SET title = COALESCE($1, title),
+                position = COALESCE($2, position)
+            WHERE id = $3
+            RETURNING *`, [title, position, req.params.id]);
         if (result.rows.length === 0) return res.status(404).json({ error: 'Board not found' });
         res.json(result.rows[0]);
     } 

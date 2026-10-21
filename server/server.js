@@ -11,7 +11,9 @@ const pool = require('./db/db');
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const cors = require('cors');
 
+app.use(cors());
 app.use(express.json());
 app.use('/todos', require('./routes/todos'));
 app.use('/boards', require('./routes/boards'));

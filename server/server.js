@@ -15,6 +15,7 @@ const cors = require('cors');
 
 app.use(cors());
 app.use(express.json());
+app.use('/events', require('./routes/events'));
 app.use('/todos', require('./routes/todos'));
 app.use('/boards', require('./routes/boards'));
 

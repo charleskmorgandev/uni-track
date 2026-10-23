@@ -8,10 +8,13 @@ function App() {
   const [editBoard, setEditBoard] = useState(null);
   const [editedText, setEditedText] = useState("");
 
+const colour = "#efefef";
+
   const onSubmitForm = async (e) => {
+    
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3000/boards", {title});
+      await axios.post("http://localhost:3000/boards", {title, colour});
       setTitle("");
       getBoards();
     } catch (err) {
@@ -35,7 +38,7 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen flex bg-gray-400 justify-center items-center p-4">
+    <div className="min-h-screen flex bg-gray-400 justify-left items-center p-4">
       <form onSubmit={onSubmitForm} className="flex items-center gap-2 p-4 bg-gray-50 outline-none rounded-2x1 shadow-xl">
         <input type="text" onChange={(e) =>
         setTitle(e.target.value)} 
@@ -43,13 +46,13 @@ function App() {
         <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium">
           Add Board </button>
       </form>
-      <div>
+      <div className="px-10">
         {boards.length === 0 ? (
           <p>No boards, make one.</p>
           ) : (
             <div>
               {boards.map((board) => (
-                <div className="bg-blue-200 rounded-md px-4 py-2 flex items-center justify-center">
+                <div className="bg-blue-200 rounded-md px-4 py-2 inline justify-center">
                   <span>{board.title}</span>
                 </div>
               ))}

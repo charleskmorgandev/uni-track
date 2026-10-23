@@ -24,11 +24,12 @@ router.get('/', async (req, res) => {
 // POST
 router.post('/', async (req, res) => {
     try {
-        const { title } = req.body;
+        const { title, colour } = req.body;
         const result = await pool.query(
-            `INSERT INTO boards (title, position) 
-            VALUES ($1, (SELECT COALESCE(MAX(position), 0) + 1 FROM boards)) 
-            RETURNING *`, [title]);
+            `INSERT INTO boards (title, colour, position)
+            VALUES ($1, COALESCE($2, '#808080'),
+                (SELECT COALESCE(MAX(position), 0) + 1 FROM boards))
+            RETURNING *`, [title, colour]);
         res.status(201).json(result.rows[0]);
     } 
     catch (err) {
@@ -39,13 +40,14 @@ router.post('/', async (req, res) => {
 // PUT
 router.put('/:id', async (req, res) => {
     try {
-        const { title, position } = req.body;
+        const { title, colour, position } = req.body;
         const result = await pool.query(
             `UPDATE boards 
             SET title = COALESCE($1, title),
-                position = COALESCE($2, position)
-            WHERE id = $3
-            RETURNING *`, [title, position, req.params.id]);
+                colour = COALESCE($2, colour),
+                position = COALESCE($3, position)
+            WHERE id = $4
+            RETURNING *`, [title, colour, position, req.params.id]);
         if (result.rows.length === 0) return res.status(404).json({ error: 'Board not found' });
         res.json(result.rows[0]);
     } 

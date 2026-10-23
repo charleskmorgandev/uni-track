@@ -29,13 +29,13 @@ router.get('/', async (req, res) => {
 // POST
 router.post('/', async (req, res) => {
     try {
-        const { board_id, subject, title } = req.body;
+        const { board_id, subject, title, colour } = req.body;
         const result = await pool.query(
-            `INSERT INTO todos (board_id, subject, title, position) 
-            VALUES ($1, $2, $3, 
+            `INSERT INTO todos (board_id, subject, title, colour, position) 
+            VALUES ($1, $2, $3, COALESCE($4, '#808080'),
                 (SELECT COALESCE(MAX(position), 0) + 1 FROM todos WHERE board_id = $1)) 
             RETURNING *`,
-            [board_id, subject, title]);
+            [board_id, subject, title, colour]);
         res.status(201).json(result.rows[0]);
     } 
     catch (err) {
@@ -46,17 +46,18 @@ router.post('/', async (req, res) => {
 // PUT
 router.put('/:id', async (req, res) => {
     try {
-        const { board_id, subject, title, checked_off, position } = req.body;
+        const { board_id, subject, title, colour, checked_off, position } = req.body;
         const result = await pool.query(
             `UPDATE todos
             SET board_id = COALESCE($1, board_id),
                 subject = COALESCE($2, subject),
                 title = COALESCE($3, title),
-                checked_off = COALESCE($4, checked_off),
-                position = COALESCE($5, position)
-            WHERE id = $6
+                colour = COALESCE($4, colour),
+                checked_off = COALESCE($5, checked_off),
+                position = COALESCE($6, position)
+            WHERE id = $7
             RETURNING *`,
-            [board_id, subject, title, checked_off, position, req.params.id]);
+            [board_id, subject, title, colour, checked_off, position, req.params.id]);
         if (result.rows.length === 0) return res.status(404).json({ error: 'Todo not found' });
         res.json(result.rows[0]);
     } 
